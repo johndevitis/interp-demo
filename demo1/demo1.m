@@ -38,8 +38,8 @@ Z = reshape(z,size(X,1),size(X,2));
 figure
 scatter(X(:),Y(:),'filled')
 title('Degrees of Freedom - Plan View')
-xlabel('Length [ft]')
-ylabel('Width [ft]')
+xlabel('Length')
+ylabel('Width')
 grid minor
 axis equal
 snapnow

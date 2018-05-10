@@ -84,8 +84,8 @@ Z = reshape(z,size(X,1),size(X,2));
 </pre><p>Plot the discrete surface sampling in plan view:</p><pre class="codeinput">figure
 scatter(X(:),Y(:),<span class="string">'filled'</span>)
 title(<span class="string">'Degrees of Freedom - Plan View'</span>)
-xlabel(<span class="string">'Length [ft]'</span>)
-ylabel(<span class="string">'Width [ft]'</span>)
+xlabel(<span class="string">'Length'</span>)
+ylabel(<span class="string">'Width'</span>)
 grid <span class="string">minor</span>
 axis <span class="string">equal</span>
 snapnow
@@ -216,8 +216,8 @@ Z = reshape(z,size(X,1),size(X,2));
 figure
 scatter(X(:),Y(:),'filled')
 title('Degrees of Freedom - Plan View')
-xlabel('Length [ft]')
-ylabel('Width [ft]')
+xlabel('Length')
+ylabel('Width')
 grid minor
 axis equal
 snapnow
