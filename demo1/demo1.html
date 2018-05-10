@@ -165,12 +165,14 @@ figure(<span class="string">'position'</span>,[250 550 1000 400]/1.25)
 <span class="keyword">function</span> plot_surface(X,Y,Z,x,y,z)
     surf(X,Y,Z)
     hold <span class="string">on</span>
-    plot3(X(:),Y(:),Z(:),<span class="string">'ok'</span>)
+    plot3(X(:),Y(:),Z(:),<span class="string">'.k'</span>)
     plot3(x,y,z,<span class="string">'ro'</span>,<span class="string">'markerface'</span>,<span class="string">'red'</span>)
     xlabel(<span class="string">'Length'</span>)
     ylabel(<span class="string">'Width'</span>)
     axis <span class="string">equal</span>
     hold <span class="string">off</span>
+    xlim([-2 2])
+    ylim([-2 2])
 <span class="keyword">end</span>
 </pre><img vspace="5" hspace="5" src="demo1_04.png" alt=""> <img vspace="5" hspace="5" src="demo1_05.png" alt=""> <img vspace="5" hspace="5" src="demo1_06.png" alt=""> <img vspace="5" hspace="5" src="demo1_07.png" alt=""> <img vspace="5" hspace="5" src="demo1_08.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
@@ -323,12 +325,14 @@ end
 function plot_surface(X,Y,Z,x,y,z)
     surf(X,Y,Z)
     hold on
-    plot3(X(:),Y(:),Z(:),'ok') 
+    plot3(X(:),Y(:),Z(:),'.k') 
     plot3(x,y,z,'ro','markerface','red')
     xlabel('Length')
     ylabel('Width')
     axis equal
     hold off
+    xlim([-2 2])
+    ylim([-2 2])
 end
 
 ##### SOURCE END #####

@@ -147,10 +147,12 @@ end
 function plot_surface(X,Y,Z,x,y,z)
     surf(X,Y,Z)
     hold on
-    plot3(X(:),Y(:),Z(:),'ok') 
+    plot3(X(:),Y(:),Z(:),'.k') 
     plot3(x,y,z,'ro','markerface','red')
     xlabel('Length')
     ylabel('Width')
     axis equal
     hold off
+    xlim([-2 2])
+    ylim([-2 2])
 end
