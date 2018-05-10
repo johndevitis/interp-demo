@@ -1,0 +1,335 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Interpolation Demo1</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-05-09"><meta name="DC.source" content="demo1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Interpolation Demo1</h1><!--introduction--><p>Example use of Matlab's griddata interpolation methods.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">First, the solution</a></li><li><a href="#5">Undersampled solution</a></li><li><a href="#7">Interpolate DOF subset to known superset</a></li></ul></div><h2 id="1">First, the solution</h2><p>Consider an arbitrary 4 x 4 surface that has some known value, z, for each x, y coordinate pair; z = f(x,y):</p><pre class="codeinput"><span class="comment">% anonlymous function so we can re-use later</span>
+f = @(x,y) -1*sin(x(:).*y(:));
+</pre><p>Sample the continuous function at 20 evenly spaced intervals along the length and width to produce 400 discrete samples.</p><p>Note the origin is arbitrarily placed at the center for convenience.</p><pre class="codeinput"><span class="comment">% longitudinal and transverse dof spacing (respectively)</span>
+<span class="comment">% these are the x and y "ticks" that we'll grid to form into unique pairs</span>
+x = linspace(-2,2,20);
+y = linspace(-2,2,20);
+
+<span class="comment">% meshgrid for inner dof sampling</span>
+[X,Y] = meshgrid(x,y); <span class="comment">% X and Y are 2d grids while x and y are vectors</span>
+
+<span class="comment">% evaluate anonymous function to return vector, z</span>
+z = f(X,Y);
+
+<span class="comment">% reshape the 1d vector to 2d grid</span>
+Z = reshape(z,size(X,1),size(X,2));
+</pre><p>Plot the discrete surface sampling in plan view:</p><pre class="codeinput">figure
+scatter(X(:),Y(:),<span class="string">'filled'</span>)
+title(<span class="string">'Degrees of Freedom - Plan View'</span>)
+xlabel(<span class="string">'Length [ft]'</span>)
+ylabel(<span class="string">'Width [ft]'</span>)
+grid <span class="string">minor</span>
+axis <span class="string">equal</span>
+snapnow
+</pre><img vspace="5" hspace="5" src="demo1_01.png" alt=""> <p>Plot the surface in 3D (left) and Plan views (right)</p><pre class="codeinput"><span class="comment">% explicitly set figure size for proportionss</span>
+figure(<span class="string">'position'</span>,[250 550 1000 400]/1.25)
+
+<span class="comment">% 3d</span>
+subplot(1,2,1)
+surf(X,Y,Z)
+hold <span class="string">on</span>
+plot3(X(:),Y(:),Z(:),<span class="string">'ok'</span>)
+set(gca,<span class="string">'view'</span>,[-45,45])
+axis <span class="string">equal</span>
+xlabel(<span class="string">'Length'</span>);
+ylabel(<span class="string">'Width'</span>);
+hold <span class="string">off</span>
+
+<span class="comment">% plan</span>
+subplot(1,2,2)
+surf(X,Y,Z)
+hold <span class="string">on</span>
+plot3(X(:),Y(:),Z(:),<span class="string">'ok'</span>)
+set(gca,<span class="string">'view'</span>,[0,90])
+axis <span class="string">equal</span>
+xlabel(<span class="string">'Length'</span>);
+ylabel(<span class="string">'Width'</span>);
+hold <span class="string">off</span>
+
+snapnow
+</pre><img vspace="5" hspace="5" src="demo1_02.png" alt=""> <h2 id="5">Undersampled solution</h2><p>Randomly (under) sample the surface at <tt>n</tt> points. Each DOF can be thought of as a measurement of the surface function, and we'll use these to interpolate back out the regular, full grid solution described above.</p><pre class="codeinput">n = 20;
+
+<span class="comment">% generate random numbers within coordinate range</span>
+xr = (2+2).*rand(n,1) -2;
+yr = (2+2).*rand(n,1) -2;
+</pre><p>Show sampled DOF in plan view</p><pre class="codeinput">figure
+scatter(X(:),Y(:),<span class="string">'.'</span>)
+hold <span class="string">on</span>
+scatter(xr,yr,<span class="string">'ro'</span>)
+title(<span class="string">'Sampled DOF'</span>)
+xlabel(<span class="string">'Length'</span>)
+ylabel(<span class="string">'Width'</span>)
+grid <span class="string">minor</span>
+axis <span class="string">equal</span>
+legend(<span class="string">'Regular Grid'</span>,<span class="string">'Measurement Location'</span>)
+snapnow
+</pre><img vspace="5" hspace="5" src="demo1_03.png" alt=""> <h2 id="7">Interpolate DOF subset to known superset</h2><p>Using the subset of known values (i.e. measurements), interpolate the full solution using Matlab's <tt>griddata</tt>. <tt>griddata</tt> has (5) interpolation methods to choose from (shown below): <tt>nearest</tt>, <tt>linear</tt>, <tt>natural</tt>, <tt>cubic</tt>, and <tt>v4</tt> (biharmonic spine). Refer to <tt>griddata</tt>'s documentation for more info.</p><pre class="codeinput"><span class="comment">% evaluate randomly chosen locations for measurement subset</span>
+zr = f(xr,yr);
+
+<span class="comment">% all griddata methods</span>
+methods = {<span class="string">'nearest'</span>, <span class="string">'linear'</span>, <span class="string">'natural'</span>, <span class="string">'cubic'</span> ,<span class="string">'v4'</span>};
+
+<span class="comment">% explicitly set figure size for proportionss</span>
+figure(<span class="string">'position'</span>,[250 550 1000 400]/1.25)
+
+<span class="comment">% loop all interp methods and display results</span>
+<span class="keyword">for</span> ii = 1:length(methods)
+
+    <span class="comment">% interpolate</span>
+    Z = griddata(xr,yr,zr,X,Y,methods{ii});
+
+    <span class="comment">% plot 3d</span>
+    subplot(1,2,1)
+    plot_surface(X,Y,Z,xr,yr,zr);
+    set(gca,<span class="string">'view'</span>,[45 45])
+    title(sprintf(<span class="string">'Method: %s'</span>,methods{ii}));
+    legend({<span class="string">'Fit surface'</span>,<span class="string">'Interpolated DOF'</span>,<span class="string">'Measurement DOF'</span>},<span class="string">'location'</span>,<span class="string">'northeast'</span>)
+    <span class="comment">% plot plan</span>
+    subplot(1,2,2)
+    plot_surface(X,Y,Z,xr,yr,zr);
+    <span class="comment">% set to plan view</span>
+    set(gca,<span class="string">'view'</span>,[0 90])
+
+    <span class="comment">% display figure when published</span>
+    snapnow
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_surface(X,Y,Z,x,y,z)
+    surf(X,Y,Z)
+    hold <span class="string">on</span>
+    plot3(X(:),Y(:),Z(:),<span class="string">'ok'</span>)
+    plot3(x,y,z,<span class="string">'ro'</span>,<span class="string">'markerface'</span>,<span class="string">'red'</span>)
+    xlabel(<span class="string">'Length'</span>)
+    ylabel(<span class="string">'Width'</span>)
+    axis <span class="string">equal</span>
+    hold <span class="string">off</span>
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="demo1_04.png" alt=""> <img vspace="5" hspace="5" src="demo1_05.png" alt=""> <img vspace="5" hspace="5" src="demo1_06.png" alt=""> <img vspace="5" hspace="5" src="demo1_07.png" alt=""> <img vspace="5" hspace="5" src="demo1_08.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Interpolation Demo1
+% Example use of Matlab's griddata interpolation methods.
+%
+
+%% First, the solution
+% Consider an arbitrary 4 x 4 surface that has some known value, z, for 
+% each x, y coordinate pair; z = f(x,y):
+%
+
+% anonlymous function so we can re-use later
+f = @(x,y) -1*sin(x(:).*y(:));
+
+%%
+% Sample the continuous function at 20 evenly spaced intervals along the 
+% length and width to produce 400 discrete samples.
+%
+% Note the origin is arbitrarily placed at the center for convenience.
+%
+
+% longitudinal and transverse dof spacing (respectively)
+% these are the x and y "ticks" that we'll grid to form into unique pairs
+x = linspace(-2,2,20);
+y = linspace(-2,2,20);
+
+% meshgrid for inner dof sampling
+[X,Y] = meshgrid(x,y); % X and Y are 2d grids while x and y are vectors
+
+% evaluate anonymous function to return vector, z
+z = f(X,Y);
+
+% reshape the 1d vector to 2d grid
+Z = reshape(z,size(X,1),size(X,2));
+
+%%
+% Plot the discrete surface sampling in plan view:
+%
+
+figure
+scatter(X(:),Y(:),'filled')
+title('Degrees of Freedom - Plan View')
+xlabel('Length [ft]')
+ylabel('Width [ft]')
+grid minor
+axis equal
+snapnow
+
+%%
+% Plot the surface in 3D (left) and Plan views (right)
+%
+
+% explicitly set figure size for proportionss
+figure('position',[250 550 1000 400]/1.25)
+
+% 3d
+subplot(1,2,1)
+surf(X,Y,Z)
+hold on
+plot3(X(:),Y(:),Z(:),'ok')
+set(gca,'view',[-45,45])
+axis equal
+xlabel('Length');
+ylabel('Width');
+hold off
+
+% plan
+subplot(1,2,2)
+surf(X,Y,Z)
+hold on
+plot3(X(:),Y(:),Z(:),'ok')
+set(gca,'view',[0,90])
+axis equal
+xlabel('Length');
+ylabel('Width');
+hold off
+
+snapnow
+
+
+%% Undersampled solution
+%
+% Randomly (under) sample the surface at |n| points. Each DOF can be 
+% thought of as a measurement of the surface function, and we'll use these
+% to interpolate back out the regular, full grid solution described above.
+
+n = 20;
+
+% generate random numbers within coordinate range
+xr = (2+2).*rand(n,1) -2;
+yr = (2+2).*rand(n,1) -2;
+
+%%
+% Show sampled DOF in plan view
+
+figure
+scatter(X(:),Y(:),'.')
+hold on
+scatter(xr,yr,'ro')
+title('Sampled DOF')
+xlabel('Length')
+ylabel('Width')
+grid minor
+axis equal
+legend('Regular Grid','Measurement Location')
+snapnow
+
+
+%% Interpolate DOF subset to known superset
+%
+% Using the subset of known values (i.e. measurements), interpolate the 
+% full solution using Matlab's |griddata|. |griddata| has (5) interpolation
+% methods to choose from (shown below): |nearest|, |linear|, |natural|, 
+% |cubic|, and |v4| (biharmonic spine). Refer to |griddata|'s 
+% documentation for more info.
+%
+
+% evaluate randomly chosen locations for measurement subset
+zr = f(xr,yr);
+
+% all griddata methods
+methods = {'nearest', 'linear', 'natural', 'cubic' ,'v4'};
+
+% explicitly set figure size for proportionss
+figure('position',[250 550 1000 400]/1.25)
+
+% loop all interp methods and display results
+for ii = 1:length(methods)
+    
+    % interpolate
+    Z = griddata(xr,yr,zr,X,Y,methods{ii});
+    
+    % plot 3d
+    subplot(1,2,1)
+    plot_surface(X,Y,Z,xr,yr,zr);
+    set(gca,'view',[45 45])
+    title(sprintf('Method: %s',methods{ii}));
+    legend({'Fit surface','Interpolated DOF','Measurement DOF'},'location','northeast')
+    % plot plan
+    subplot(1,2,2)
+    plot_surface(X,Y,Z,xr,yr,zr);
+    % set to plan view
+    set(gca,'view',[0 90])
+    
+    % display figure when published
+    snapnow
+end
+
+function plot_surface(X,Y,Z,x,y,z)
+    surf(X,Y,Z)
+    hold on
+    plot3(X(:),Y(:),Z(:),'ok') 
+    plot3(x,y,z,'ro','markerface','red')
+    xlabel('Length')
+    ylabel('Width')
+    axis equal
+    hold off
+end
+
+##### SOURCE END #####
+--></body></html>
